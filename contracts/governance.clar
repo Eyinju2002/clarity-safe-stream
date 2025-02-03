@@ -3,6 +3,7 @@
 ;; Constants
 (define-constant min-votes u3)
 (define-constant vote-period u144) ;; ~1 day in blocks
+(define-constant err-already-voted (err u404))
 
 ;; Maps
 (define-map votes
@@ -26,6 +27,7 @@
     (map-get? vote-counts { claim-id: claim-id }))))
     
     (asserts! (< block-height (get end-block vote-count)) (err u403))
+    (asserts! (is-none (map-get? votes { claim-id: claim-id, voter: tx-sender })) err-already-voted)
     
     (map-set votes
       { claim-id: claim-id, voter: tx-sender }
