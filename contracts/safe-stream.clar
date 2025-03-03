@@ -6,6 +6,7 @@
 (define-constant err-invalid-pool (err u101))
 (define-constant err-pool-exists (err u102))
 (define-constant err-insufficient-stake (err u103))
+(define-constant err-unauthorized (err u104))
 
 ;; Data vars
 (define-map pools
@@ -63,5 +64,16 @@
     )
     (var-set next-claim-id (+ claim-id u1))
     (ok claim-id)
+  )
+)
+
+(define-public (update-claim-status (claim-id uint) (new-status (string-ascii 10)))
+  (let ((claim (unwrap! (map-get? claims { claim-id: claim-id }) err-invalid-pool)))
+    (asserts! (is-eq contract-caller .governance) err-unauthorized)
+    (map-set claims
+      { claim-id: claim-id }
+      (merge claim { status: new-status })
+    )
+    (ok true)
   )
 )
